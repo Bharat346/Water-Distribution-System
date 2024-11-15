@@ -1,0 +1,97 @@
+/* General container for the component */
+.leak_graph-container {
+  padding: 20px;
+  border-radius: 8px;
+  height: 170%;
+  width: 100%;
+  position: relative;
+  left: 50%;
+  transform: translate(-50%);
+}
+
+/* Header for the component */
+.leak_graph-container h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Dataset selection radio button section */
+.leak_graph-dataset-selection {
+  margin-bottom: 20px;
+}
+
+.leak_graph-dataset-selection span {
+  font-size: 16px;
+  color: #333;
+  margin-right: 10px;
+}
+
+.leak_graph-dataset-selection label {
+  margin-right: 15px;
+  font-size: 16px;
+}
+
+.leak_graph-dataset-selection input[type="radio"] {
+  margin-right: 5px;
+}
+
+/* Optimal graph checkbox section */
+.leak_graph-checkbox-section {
+  margin-bottom: 20px;
+}
+
+.leak_graph-checkbox-section label {
+  font-size: 16px;
+  color: #333;
+}
+
+.leak_graph-checkbox-section input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+/* Graph display container */
+#leak_graph-leakage-network {
+  height: 500px;
+  border: 1px solid lightgray;
+  border-radius: 8px;
+}
+
+/* To ensure better accessibility and spacing */
+input[type="radio"],
+input[type="checkbox"] {
+  cursor: pointer;
+}
+
+input[type="radio"]:checked,
+input[type="checkbox"]:checked {
+  background-color: #4caf50;
+  color: white;
+}
+
+input[type="radio"]:focus,
+input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.5);
+}
+
+/* Add spacing and neatness for elements */
+.leak_graph-dataset-selection,
+.leak_graph-checkbox-section {
+  margin-bottom: 15px;
+}
+
+/* Styling for the 'No data' or 'No leaks' in graph */
+.leak_graph-no-leakages {
+  color: green;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.leak_graph-leakages {
+  color: red;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}

@@ -1,0 +1,39 @@
+/* src/styles/network-visualize.css */
+
+.network-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  width:89%;
+  position: relative;
+  left:50%;
+  transform: translate(-50%);
+  border-radius:7px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top:40px;
+}
+
+.network-heading {
+    font-size: 28px;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.network-dataset-selection {
+  margin-bottom: 20px;
+}
+
+.network-dataset-selection span {
+  margin-right: 10px;
+}
+
+.network-dataset-selection label {
+  margin-right: 15px;
+  font-size: 14px;
+}
+
+.network-graph-container {
+  height: 500px;
+  border: 1px solid lightgray;
+  margin-top: 20px;
+}
