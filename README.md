@@ -42,20 +42,21 @@ A web-based interactive tool for simulating and optimizing water distribution ne
 
 ## 📋 Input Format
 
-### Nodes:
+### 1. Nodes:
 ```json
-{
-  "label": "NodeName",
-  "node_type": "source/normal",
-  "pressure": 10,    // For source nodes
-  "velocity": 5      // For source nodes
-}
+ {
+   "label": "NodeName",
+   "node_type": "source/normal",
+   "pressure": 10,    // For source nodes
+   "velocity": 5      // For source nodes
+ }
+```
 
-### Edges:
+### 2. Edges:
 ```json
 {
   "label": "PipeName",
   "distance": 100,      // Length of the pipe
   "flow_rate": 20       // Flow rate through the pipe
 }
-
+```
