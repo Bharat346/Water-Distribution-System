@@ -1,44 +1,44 @@
-// src/pages/NetworkVisualise.jsx
-
+// src/components/NetworkVisualizer.jsx
 import React, { useEffect, useState } from "react";
 import { DataSet, Network } from "vis-network/standalone/esm/vis-network";
 import { calculateMST } from "../utils/mst";
 import { datasets } from "../../public/data";
 import { useDataset } from "./dataSetContext";
-import "../components/style/network-visual-1.css";
+import "../components/style/network-visualizer.css";
 
 function NetworkVisualizer({ windowSize }) {
   const { selectedDataset, setSelectedDataset } = useDataset();
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
-  const [networkInstance, setNetworkInstance] = useState(null); // To store the Network instance
+  const [networkInstance, setNetworkInstance] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set default dataset if not selected
-    if (selectedDataset == null) {
-      setSelectedDataset(1); // Set default if not selected
-    }
+    if (selectedDataset == null) setSelectedDataset(1);
   }, [selectedDataset, setSelectedDataset]);
 
   const handleDatasetChange = (event) => {
     setSelectedDataset(parseInt(event.target.value));
+    setIsLoading(true);
   };
 
   useEffect(() => {
     if (!datasets[selectedDataset]) return;
 
-    // Get nodes and edges from the selected dataset
     const nodes = datasets[selectedDataset].nodes;
     const edges = datasets[selectedDataset].edges;
     const mstEdges = calculateMST(nodes, edges);
 
-    // Prepare the data for the graph
     const visNodes = new DataSet(
       nodes.map((node) => ({
         id: node.id,
-        label: node.zoneType,
-        title: `Density: ${node.density}\nWater Need: ${node.waterNeed}\nPressure: ${node.pressure}`,
+        label: `${node.id} (${node.zoneType})`,
+        title: `Zone: ${node.zoneType}\nDensity: ${node.density}\nWater Need: ${node.waterNeed}\nPressure: ${node.pressure}`,
         color: getNodeColor(node.zoneType),
         shape: "dot",
+        size: 20,
+        font: { size: 14, face: "Roboto", color: "#2D3748" },
+        borderWidth: 2,
+        shadow: true,
       }))
     );
 
@@ -46,88 +46,152 @@ function NetworkVisualizer({ windowSize }) {
       mstEdges.map((edge) => ({
         from: edge.source,
         to: edge.target,
-        label: `Dist: ${edge.distance}`,
+        label: `${edge.distance}m`,
+        color: "#4B5563",
+        width: 2,
+        smooth: { type: "continuous" },
+        font: { size: 12, strokeWidth: 0, color: "#4B5563" },
       }))
     );
 
-    // Set graph data
     setGraphData({ nodes: visNodes, edges: visEdges });
-  }, [selectedDataset]); // Effect hook will trigger on dataset change
+    setIsLoading(false);
+  }, [selectedDataset]);
 
   const getNodeColor = (zoneType) => {
-    switch (zoneType) {
-      case "Agricultural":
-        return "#7CFC00";
-      case "Industrial":
-        return "#FFD700";
-      case "Urban":
-        return "#4682B4";
-      case "source":
-        return "rgb(10,200,350)";
-      default:
-        return "#D3D3D3";
-    }
+    const colors = {
+      Agricultural: "#7CFC00",
+      Industrial: "#FFD700",
+      Urban: "#4682B4",
+      source: "#3B82F6",
+      default: "#D3D3D3",
+    };
+    return colors[zoneType] || colors.default;
   };
 
   useEffect(() => {
-    // Reinitialize the network graph when graphData or windowSize changes
     if (graphData.nodes.length && graphData.edges.length) {
       const container = document.getElementById("network");
-      if (container) {
-        const data = { nodes: graphData.nodes, edges: graphData.edges };
-        const options = {
-          nodes: { font: { size: 14, color: "black" }, borderWidth: 2 },
-          edges: { width: 2, color: { inherit: true } },
-          physics: { enabled: true },
-          interaction: { hover: true, tooltipDelay: 200, zoomView: false, dragNodes: true },
-        };
+      const data = { nodes: graphData.nodes, edges: graphData.edges };
 
-        // Create a new Network graph instance or update the existing one
-        if (networkInstance) {
-          networkInstance.setData(data); // Update the existing instance with new data
-          networkInstance.redraw(); // Redraw the network to adjust it to the new data
-        } else {
-          const network = new Network(container, data, options);
-          setNetworkInstance(network); // Store the network instance
-        }
+      const options = {
+        nodes: {
+          borderWidth: 2,
+          shadow: {
+            enabled: true,
+            color: "rgba(0,0,0,0.2)",
+            size: 10,
+            x: 5,
+            y: 5,
+          },
+        },
+        edges: {
+          width: 2,
+          shadow: {
+            enabled: true,
+            color: "rgba(0,0,0,0.1)",
+            size: 10,
+            x: 5,
+            y: 5,
+          },
+        },
+        physics: {
+          barnesHut: {
+            gravitationalConstant: -2000,
+            centralGravity: 0.3,
+            springLength: 95,
+            springConstant: 0.04,
+            damping: 0.09,
+            avoidOverlap: 0.1,
+          },
+          stabilization: { iterations: 250 },
+        },
+        interaction: {
+          hover: true,
+          tooltipDelay: 200,
+          zoomView: true,
+          dragNodes: true,
+          keyboard: {
+            enabled: true,
+            speed: { x: 10, y: 10, zoom: 0.02 },
+          },
+        },
+      };
+
+      if (networkInstance) {
+        networkInstance.setData(data);
+        networkInstance.setOptions(options);
+      } else {
+        const network = new Network(container, data, options);
+        setNetworkInstance(network);
       }
     }
-  }, [graphData, windowSize, networkInstance]); // Re-render when graphData, windowSize, or networkInstance changes
+  }, [graphData, windowSize, networkInstance]);
 
   return (
-    <div className="network-container">
-      <h2 className="network-heading">(1) Water Distribution Network</h2>
-      <div className="network-dataset-selection">
-        <span>Select dataset: </span>
-        <label>
-          <input
-            type="radio"
-            value={1}
-            checked={selectedDataset === 1}
+    <div className="network-visualizer">
+      <div className="section-header">
+        <h2 className="section-title">
+          <span className="title-icon">🌐</span>
+          Water Distribution Network
+        </h2>
+        <div className="dataset-selector">
+          <select
+            className="dataset-select"
+            value={selectedDataset}
             onChange={handleDatasetChange}
-          />
-          Dataset-1
-        </label>
-        <label>
-          <input
-            type="radio"
-            value={2}
-            checked={selectedDataset === 2}
-            onChange={handleDatasetChange}
-          />
-          Dataset-2
-        </label>
-        <label>
-          <input
-            type="radio"
-            value={3}
-            checked={selectedDataset === 3}
-            onChange={handleDatasetChange}
-          />
-          Dataset-3
-        </label>
+          >
+            <option value="1">Dataset 1</option>
+            <option value="2">Dataset 2</option>
+            <option value="3">Dataset 3</option>
+          </select>
+          <div className="select-arrow">▼</div>
+        </div>
       </div>
-      <div id="network" className="network-graph-container" />
+
+      <div className="network-container">
+        {isLoading ? (
+          <div className="loading-overlay">
+            <div className="loading-spinner"></div>
+            <p>Generating network visualization...</p>
+          </div>
+        ) : null}
+        <div id="network" className="network-graph"></div>
+      </div>
+
+      <div className="legend">
+        <div className="legend-title">Zone Types:</div>
+        <div className="legend-items">
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#3B82F6" }}
+            ></div>
+            <span>Source</span>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#4682B4" }}
+            ></div>
+            <span>Urban</span>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#FFD700" }}
+            ></div>
+            <span>Industrial</span>
+          </div>
+          <div className="legend-item">
+            <div
+              className="legend-color"
+              style={{ backgroundColor: "#7CFC00" }}
+            ></div>
+            <span>Agricultural</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
